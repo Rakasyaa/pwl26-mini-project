@@ -4,13 +4,13 @@ REST API CRUD untuk data buku dan peminjaman, dibangun dengan **Express.js + MyS
 
 ## Identitas
 
-| | |
-|---|---|
-| Nama | **[ISI NAMA LENGKAP]** |
-| NIM | **[ISI NIM]** |
-| Kelas | [ISI KELAS] |
-| Kasus yang dipilih | Books API (buku + peminjaman) |
-| Link video presentasi | [ISI LINK YOUTUBE UNLISTED / GOOGLE DRIVE] |
+|                       |                                |
+| --------------------- | ------------------------------ |
+| Nama                  | **Rakasya Yoga Surya Pratama** |
+| NIM                   | **F1D02310022**                |
+| Kelas                 | Tidak dicantumkan              |
+| Kasus yang dipilih    | Books API (buku + peminjaman)  |
+| Link video presentasi | Belum dicantumkan              |
 
 ## Teknologi
 
@@ -46,7 +46,7 @@ REST API CRUD untuk data buku dan peminjaman, dibangun dengan **Express.js + MyS
    ```
    Server berjalan di `http://localhost:3000`.
 
-Pengujian: buka `requests.http` di VS Code (ekstensi **REST Client**), lalu klik *Send Request* pada tiap blok. Ganti variabel `@namaSaya` di bagian atas file dengan nama + NIM sendiri.
+Pengujian: buka `requests.http` di VS Code (ekstensi **REST Client**), lalu klik _Send Request_ pada tiap blok. Variabel `@namaSaya` pada bagian atas file digunakan untuk mencantumkan identitas saat pengujian. Sesuaikan nilainya dengan nama dan NIM sebelum menjalankan request.
 
 ## Struktur Proyek
 
@@ -107,36 +107,43 @@ erDiagram
 - **Tabel utama `buku`**: 8 kolom. Kolom angka: `harga`, `stok`. Kolom tanggal: `tanggalTerbit`, `createdAt`. Kolom teks unik: `isbn`.
 - **Tabel kedua `peminjaman`**: relasi satu-ke-banyak (satu buku bisa dipinjam berkali-kali), foreign key `bukuId`.
 - Migrasi: `prisma/migrations/20261111080000_buat_tabel_buku_peminjaman`.
-- Seed: 12 buku dan 2 peminjaman. Buku id 6 (*Clean Code*) sengaja berstok 1 untuk menguji kasus stok tidak cukup.
+- Seed: 12 buku dan 2 peminjaman. Buku id 6 (_Clean Code_) sengaja berstok 1 untuk menguji kasus stok tidak cukup.
 
 ## Daftar Endpoint
 
 ### Buku
 
-| Method | URL | Keterangan | Status |
-|---|---|---|---|
-| GET | `/buku` | Daftar buku, paginasi + filter | 200 |
-| GET | `/buku/:id` | Detail satu buku | 200, 400, 404 |
-| POST | `/buku` | Tambah buku | 201, 409, 422 |
-| PUT | `/buku/:id` | Ubah buku (semua field) | 200, 400, 404, 409, 422 |
-| DELETE | `/buku/:id` | Hapus buku | 204, 400, 404, 409 |
+| Method | URL         | Keterangan                     | Status                  |
+| ------ | ----------- | ------------------------------ | ----------------------- |
+| GET    | `/buku`     | Daftar buku, paginasi + filter | 200                     |
+| GET    | `/buku/:id` | Detail satu buku               | 200, 400, 404           |
+| POST   | `/buku`     | Tambah buku                    | 201, 409, 422           |
+| PUT    | `/buku/:id` | Ubah buku (semua field)        | 200, 400, 404, 409, 422 |
+| DELETE | `/buku/:id` | Hapus buku                     | 204, 400, 404, 409      |
 
 **Query `GET /buku`:**
 
-| Parameter | Default | Keterangan |
-|---|---|---|
-| `halaman` | 1 | Nomor halaman |
-| `ukuran` | 10 | Jumlah data per halaman (maksimal 100) |
-| `cari` | - | **Filter**: judul mengandung teks tersebut |
+| Parameter | Default | Keterangan                                 |
+| --------- | ------- | ------------------------------------------ |
+| `halaman` | 1       | Nomor halaman                              |
+| `ukuran`  | 10      | Jumlah data per halaman (maksimal 100)     |
+| `cari`    | -       | **Filter**: judul mengandung teks tersebut |
 
 Contoh: `GET /buku?halaman=2&ukuran=5&cari=bumi`
 
 ```json
 {
   "data": [
-    { "id": 12, "isbn": "9786232160033", "judul": "Bumi", "penulis": "Tere Liye",
-      "harga": 95000, "stok": 14, "tanggalTerbit": "2014-01-01T00:00:00.000Z",
-      "createdAt": "2026-11-11T07:35:00.777Z" }
+    {
+      "id": 12,
+      "isbn": "9786232160033",
+      "judul": "Bumi",
+      "penulis": "Tere Liye",
+      "harga": 95000,
+      "stok": 14,
+      "tanggalTerbit": "2014-01-01T00:00:00.000Z",
+      "createdAt": "2026-11-11T07:35:00.777Z"
+    }
   ],
   "meta": { "halaman": 1, "ukuran": 10, "total": 2, "totalHalaman": 1 }
 }
@@ -159,10 +166,10 @@ Contoh: `GET /buku?halaman=2&ukuran=5&cari=bumi`
 
 ### Peminjaman (tabel kedua)
 
-| Method | URL | Keterangan | Status |
-|---|---|---|---|
-| GET | `/peminjaman` | Daftar peminjaman **beserta data bukunya** (`include`) | 200 |
-| POST | `/peminjaman` | Pinjam buku: simpan peminjaman **dan** kurangi stok (transaksi) | 201, 404, 409, 422 |
+| Method | URL           | Keterangan                                                      | Status             |
+| ------ | ------------- | --------------------------------------------------------------- | ------------------ |
+| GET    | `/peminjaman` | Daftar peminjaman **beserta data bukunya** (`include`)          | 200                |
+| POST   | `/peminjaman` | Pinjam buku: simpan peminjaman **dan** kurangi stok (transaksi) | 201, 404, 409, 422 |
 
 **Body `POST /peminjaman`:**
 
@@ -179,63 +186,75 @@ Dua langkah dibungkus `prisma.$transaction` (lihat `src/services/peminjaman.serv
 1. `tx.peminjaman.create(...)` — simpan baris peminjaman
 2. `tx.buku.update({ stok: { decrement: jumlah } })` — kurangi stok buku
 
-Kalau ada `throw` di dalam transaksi (buku tidak ada, stok tidak cukup, atau error lain), seluruh perubahan dibatalkan (*rollback*), sehingga tabel `peminjaman` dan `buku` tidak pernah tidak sinkron.
+Kalau ada `throw` di dalam transaksi (buku tidak ada, stok tidak cukup, atau error lain), seluruh perubahan dibatalkan (_rollback_), sehingga tabel `peminjaman` dan `buku` tidak pernah tidak sinkron.
 
 ## Format Error
 
 Semua error dijawab oleh `errorHandler` dengan format yang sama:
 
 ```json
-{ "error": { "pesan": "Stok tidak cukup (tersisa 1)", "kode": "STOK_TIDAK_CUKUP" } }
+{
+  "error": {
+    "pesan": "Stok tidak cukup (tersisa 1)",
+    "kode": "STOK_TIDAK_CUKUP"
+  }
+}
 ```
 
-| Status | Kode | Kapan terjadi |
-|---|---|---|
-| 400 | `ID_TIDAK_VALID`, `REQUEST_ERROR` | id bukan angka, JSON rusak |
-| 404 | `NOT_FOUND`, `BUKU_NOT_FOUND`, `ROUTE_NOT_FOUND` | data atau URL tidak ada |
-| 409 | `ISBN_DUPLIKAT`, `STOK_TIDAK_CUKUP`, `BUKU_MASIH_DIPINJAM` | konflik dengan data yang ada |
-| 422 | `VALIDATION_ERROR` | isi kiriman tidak lolos Joi |
-| 500 | `INTERNAL_ERROR` | bug tak terduga; klien hanya menerima pesan umum, detail dicatat di terminal server |
+| Status | Kode                                                       | Kapan terjadi                                                                       |
+| ------ | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 400    | `ID_TIDAK_VALID`, `REQUEST_ERROR`                          | id bukan angka, JSON rusak                                                          |
+| 404    | `NOT_FOUND`, `BUKU_NOT_FOUND`, `ROUTE_NOT_FOUND`           | data atau URL tidak ada                                                             |
+| 409    | `ISBN_DUPLIKAT`, `STOK_TIDAK_CUKUP`, `BUKU_MASIH_DIPINJAM` | konflik dengan data yang ada                                                        |
+| 422    | `VALIDATION_ERROR`                                         | isi kiriman tidak lolos Joi                                                         |
+| 500    | `INTERNAL_ERROR`                                           | bug tak terduga; klien hanya menerima pesan umum, detail dicatat di terminal server |
 
 ## Middleware
 
-| Middleware | File | Fungsi |
-|---|---|---|
-| `logger` | `src/middleware/logger.js` | Mencatat `METHOD URL -> STATUS (ms)` |
-| `validasi` | `src/middleware/validasi.js` | Memeriksa body dengan skema Joi, gagal = 422 |
-| `notFound` | `src/middleware/notFound.js` | URL yang tidak dikenal menjadi 404 berformat seragam |
+| Middleware     | File                             | Fungsi                                                               |
+| -------------- | -------------------------------- | -------------------------------------------------------------------- |
+| `logger`       | `src/middleware/logger.js`       | Mencatat `METHOD URL -> STATUS (ms)`                                 |
+| `validasi`     | `src/middleware/validasi.js`     | Memeriksa body dengan skema Joi, gagal = 422                         |
+| `notFound`     | `src/middleware/notFound.js`     | URL yang tidak dikenal menjadi 404 berformat seragam                 |
 | `errorHandler` | `src/middleware/errorHandler.js` | Satu-satunya yang menjawab error; error 500 tidak membocorkan detail |
 
 ## Screenshot Pengujian
 
 Setiap gambar memperlihatkan nama/NIM (lewat variabel `@namaSaya` di `requests.http`). Simpan gambar di folder `screenshot/` dengan nama berikut.
 
-| Kasus | Status | Gambar |
-|---|---|---|
-| Daftar buku + paginasi | 200 | ![](screenshot/01-get-buku-200.png) |
-| Filter `?cari=bumi` | 200 | ![](screenshot/02-filter-200.png) |
-| Detail buku | 200 | ![](screenshot/03-detail-200.png) |
-| Tambah buku | 201 | ![](screenshot/04-post-201.png) |
-| Ubah buku | 200 | ![](screenshot/05-put-200.png) |
-| Hapus buku | 204 | ![](screenshot/06-delete-204.png) |
-| Daftar peminjaman (include) | 200 | ![](screenshot/07-peminjaman-200.png) |
-| Pinjam buku (transaksi berhasil) | 201 | ![](screenshot/08-transaksi-201.png) |
-| Buku tidak ditemukan | 404 | ![](screenshot/09-not-found-404.png) |
-| id bukan angka | 400 | ![](screenshot/10-bad-request-400.png) |
-| ISBN kembar | 409 | ![](screenshot/11-isbn-409.png) |
-| Stok tidak cukup (transaksi gagal) | 409 | ![](screenshot/12-stok-409.png) |
-| Data tidak valid | 422 | ![](screenshot/13-validasi-422.png) |
-| Bukti phpMyAdmin: stok berkurang | - | ![](screenshot/14-phpmyadmin-stok.png) |
+| Kasus                              | Status | Gambar                                 |
+| ---------------------------------- | ------ | -------------------------------------- |
+| Daftar buku + paginasi             | 200    | ![](screenshot/01-get-buku-200.png)    |
+| Filter `?cari=bumi`                | 200    | ![](screenshot/02-filter-200.png)      |
+| Detail buku                        | 200    | ![](screenshot/03-detail-200.png)      |
+| Tambah buku                        | 201    | ![](screenshot/04-post-201.png)        |
+| Ubah buku                          | 200    | ![](screenshot/05-put-200.png)         |
+| Hapus buku                         | 204    | ![](screenshot/06-delete-204.png)      |
+| Daftar peminjaman (include)        | 200    | ![](screenshot/07-peminjaman-200.png)  |
+| Pinjam buku (transaksi berhasil)   | 201    | ![](screenshot/08-transaksi-201.png)   |
+| Buku tidak ditemukan               | 404    | ![](screenshot/09-not-found-404.png)   |
+| id bukan angka                     | 400    | ![](screenshot/10-bad-request-400.png) |
+| ISBN kembar                        | 409    | ![](screenshot/11-isbn-409.png)        |
+| Stok tidak cukup (transaksi gagal) | 409    | ![](screenshot/12-stok-409.png)        |
+| Data tidak valid                   | 422    | ![](screenshot/13-validasi-422.png)    |
+| Bukti phpMyAdmin: stok berkurang   | -      | ![](screenshot/14-phpmyadmin-stok.png) |
 
 ## Deklarasi Penggunaan AI
 
-> **[EDIT bagian ini sesuai kenyataan. Tulis jujur: bagian mana, untuk apa, dan bagaimana kamu memeriksa hasilnya.]**
+| Bagian                 | Alat AI | Digunakan untuk apa                                                                                                   | Cara memeriksa hasilnya                                                                                                |
+| ---------------------- | ------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Perancangan basis data | ChatGPT | Membantu membuat database untuk menyimpan data buku dan peminjaman.                                                   | Memeriksa struktur tabel, kolom, serta relasi melalui Prisma dan phpMyAdmin.                                           |
+| Pengujian API          | ChatGPT | Membantu membuat format request pada file `requests.http` untuk menguji endpoint.                                     | Menjalankan setiap request melalui REST Client dan memeriksa status serta respons yang dihasilkan.                     |
+| Struktur proyek        | ChatGPT | Membantu menyusun peletakan folder dan file agar struktur proyek lebih rapi dan terorganisasi.                        | Memeriksa kesesuaian lokasi file dengan fungsi masing-masing bagian aplikasi dan memastikan aplikasi dapat dijalankan. |
+| Penanganan kesalahan   | ChatGPT | Membantu menentukan error handling agar kesalahan aplikasi menghasilkan respons dengan status dan format yang sesuai. | Menguji kondisi berhasil maupun gagal, lalu memeriksa kode status, format respons error, dan log pada terminal.        |
 
-- **Alat yang dipakai:** Claude (Anthropic).
-- **Bagian yang dibantu AI:** [contoh: kerangka awal proyek (struktur folder, skema Prisma, route/controller/service/data, middleware, seed, requests.http) dan draf README].
-- **Rujukan:** kode mengikuti pola dari materi Pertemuan 5 (middleware, error terpusat, struktur berlapis), Pertemuan 6 (Prisma, migrasi), dan Pertemuan 7 (paginasi, filter, transaksi, seed).
-- **Cara saya memeriksa hasilnya:** [contoh: membaca dan menjalankan seluruh kode, menguji tiap endpoint lewat `requests.http`, mengecek tabel di phpMyAdmin, dan mencoba sendiri melempar error di tengah transaksi untuk melihat rollback].
-- **Bagian yang saya kerjakan/ubah sendiri:** [ISI].
+Pernyataan: Saya menggunakan ChatGPT sebagai alat bantu pada bagian-bagian yang tercantum dalam tabel. Hasilnya diperiksa kembali dengan menjalankan aplikasi, menguji endpoint melalui `requests.http`, serta memeriksa data dan perubahan stok pada database.
+
+## Kesimpulan & Kendala
+
+Mini Project ini menghasilkan REST API untuk pengelolaan data buku dan peminjaman menggunakan Express.js, MySQL, dan Prisma. Fitur yang diterapkan mencakup operasi CRUD buku, pencarian dan paginasi, pencatatan peminjaman, serta pengurangan stok melalui transaksi database. Validasi Joi dan error handler terpusat digunakan agar input dan kesalahan aplikasi ditangani dengan respons yang terstruktur.
+
+Dalam pengerjaannya, beberapa hal yang perlu diperhatikan adalah konfigurasi koneksi database pada `.env`, menjalankan migrasi sebelum menggunakan API, serta memastikan proses peminjaman dan pengurangan stok berjalan dalam satu transaksi. Pengujian melalui `requests.http` dan pemeriksaan data di phpMyAdmin membantu memastikan endpoint serta perubahan data berjalan sesuai kebutuhan.
 
 ## Catatan
 
