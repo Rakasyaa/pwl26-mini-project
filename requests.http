@@ -1,0 +1,169 @@
+# Pengujian API dengan ekstensi REST Client (VS Code: humao.rest-client)
+# Klik "Send Request" di atas tiap blok. Jalankan server dulu: npm run dev
+# Kalau data berantakan setelah banyak percobaan: npx prisma db seed
+
+@baseUrl = http://localhost:3000
+
+# >>> GANTI dengan nama + NIM kamu agar tampil di setiap screenshot <<<
+@namaSaya = Rakasya Yoga Surya Pratama - F1D02310022
+
+###############################################################
+# BUKU - READ
+###############################################################
+
+### [200] Daftar buku (paginasi)
+GET {{baseUrl}}/buku?halaman=1&ukuran=5
+
+### [200] Halaman 2
+GET {{baseUrl}}/buku?halaman=2&ukuran=5
+
+### [200] Filter judul mengandung "bumi"
+GET {{baseUrl}}/buku?cari=bumi
+
+### [200] Detail satu buku
+GET {{baseUrl}}/buku/1
+
+### [404] Buku tidak ada
+GET {{baseUrl}}/buku/999
+
+### [400] id bukan angka
+GET {{baseUrl}}/buku/abc
+
+### [404] URL tidak dikenal (ROUTE_NOT_FOUND)
+GET {{baseUrl}}/xyz
+
+###############################################################
+# BUKU - CREATE, UPDATE, DELETE
+###############################################################
+
+### [201] Tambah buku (ISBN dibuat unik otomatis pakai timestamp)
+# @name tambahBuku
+POST {{baseUrl}}/buku
+Content-Type: application/json
+
+{
+    "isbn": "978{{$timestamp}}",
+    "judul": "Buku Uji",
+    "penulis": "{{namaSaya}}",
+    "harga": 75000,
+    "stok": 5,
+    "tanggalTerbit": "2024-01-15"
+}
+
+### [409] ISBN sudah ada (memakai ISBN dari buku yang baru dibuat di atas)
+POST {{baseUrl}}/buku
+Content-Type: application/json
+
+{
+    "isbn": "{{tambahBuku.response.body.$.data.isbn}}",
+    "judul": "Buku Kembar",
+    "penulis": "{{namaSaya}}",
+    "harga": 10000,
+    "tanggalTerbit": "2024-01-15"
+}
+
+### [422] Data tidak valid (isbn, penulis, tanggalTerbit kosong; harga negatif)
+POST {{baseUrl}}/buku
+Content-Type: application/json
+
+{
+    "judul": "{{namaSaya}}",
+    "harga": -5
+}
+
+### [400] JSON rusak
+POST {{baseUrl}}/buku
+Content-Type: application/json
+
+{ngawur}
+
+### [200] Ubah buku yang baru dibuat
+PUT {{baseUrl}}/buku/{{tambahBuku.response.body.$.data.id}}
+Content-Type: application/json
+
+{
+    "isbn": "{{tambahBuku.response.body.$.data.isbn}}",
+    "judul": "Buku Uji (Edit)",
+    "penulis": "{{namaSaya}}",
+    "harga": 80000,
+    "stok": 7,
+    "tanggalTerbit": "2024-01-15"
+}
+
+### [409] Ubah dengan ISBN milik buku lain (Laskar Pelangi)
+PUT {{baseUrl}}/buku/{{tambahBuku.response.body.$.data.id}}
+Content-Type: application/json
+
+{
+    "isbn": "9789793062792",
+    "judul": "Buku Uji",
+    "penulis": "{{namaSaya}}",
+    "harga": 80000,
+    "tanggalTerbit": "2024-01-15"
+}
+
+### [404] Ubah buku yang tidak ada
+PUT {{baseUrl}}/buku/999
+Content-Type: application/json
+
+{
+    "isbn": "9780000000002",
+    "judul": "Tidak Ada",
+    "penulis": "{{namaSaya}}",
+    "harga": 1000,
+    "tanggalTerbit": "2024-01-15"
+}
+
+### [204] Hapus buku yang baru dibuat
+DELETE {{baseUrl}}/buku/{{tambahBuku.response.body.$.data.id}}
+
+### [404] Hapus lagi (sudah tidak ada)
+DELETE {{baseUrl}}/buku/{{tambahBuku.response.body.$.data.id}}
+
+### [409] Hapus buku yang masih punya data peminjaman
+DELETE {{baseUrl}}/buku/1
+
+###############################################################
+# PEMINJAMAN (tabel kedua + TRANSAKSI)
+###############################################################
+
+### [200] Daftar peminjaman beserta data bukunya (include)
+GET {{baseUrl}}/peminjaman
+
+### [201] Pinjam buku id 3 sebanyak 2 -> baris peminjaman dibuat DAN stok buku berkurang 2
+POST {{baseUrl}}/peminjaman
+Content-Type: application/json
+
+{
+    "bukuId": 3,
+    "namaPeminjam": "{{namaSaya}}",
+    "jumlah": 2
+}
+
+### [409] Stok tidak cukup (Clean Code stok 1, minta 5) -> kedua tabel tidak berubah
+POST {{baseUrl}}/peminjaman
+Content-Type: application/json
+
+{
+    "bukuId": 6,
+    "namaPeminjam": "{{namaSaya}}",
+    "jumlah": 5
+}
+
+### [404] Buku tidak ada
+POST {{baseUrl}}/peminjaman
+Content-Type: application/json
+
+{
+    "bukuId": 999,
+    "namaPeminjam": "{{namaSaya}}"
+}
+
+### [422] Data tidak valid
+POST {{baseUrl}}/peminjaman
+Content-Type: application/json
+
+{
+    "bukuId": "a",
+    "namaPeminjam": "x"
+}
